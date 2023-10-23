@@ -12,4 +12,10 @@ namespace WebApplication1.Data
         }
         public DbSet<WebApplication1.Models.User> User { get; set; } = default!;
     }
+    public class UserContext : DbContext
+    {
+        public UserContext(DbContextOptions<UserContext> options) : base(options) { }
+
+        public DbSet<User> Users { get; set; }
+    }
 }

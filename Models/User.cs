@@ -1,25 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Xml.Serialization;
 
 namespace WebApplication1.Models
 {
+    [Serializable]
+    [XmlRoot("User")]
     public class User
     {
-        [Key]
+        [XmlElement("Id")]
         public int Id { get; set; }
-        [Required]
+        [XmlElement("FirstName")]
         public required string Name { get; set; }
-        [Required]
+        [XmlElement("LastName")]
         public required string Surname { get; set; }
-        [Required]
-        public required bool Gender { get; set; }
-        [Required]
+        [XmlElement("Gender")]
+        public required string Gender { get; set; }
+        [XmlElement("BirthDate")]
         public required DateTime BirthDate { get; set; }
-        public int TelephoneNumber { get; set; }
+        [XmlElement("TelephoneNumber")]
+        public int? TelephoneNumber { get; set; }
+        [XmlElement("Position")]
         public string? Position { get; set; }
-        public int ShoeSize { get; set; }
+        [XmlElement("ShoeSize")]
+        public int? ShoeSize { get; set; }
         public User()
         {
-                
+
         }
     }
 }

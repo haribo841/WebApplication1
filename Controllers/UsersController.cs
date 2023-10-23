@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,154 +11,44 @@ using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
-    public class UsersController : Controller
+    public class UserController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private string dataFilePath = "users.xml";
 
-        public UsersController(ApplicationDbContext context)
+        public IActionResult Index()
         {
-            _context = context;
+            List<User> users = ReadUsersFromXML();
+            return View(users);
         }
 
-        // GET: Users
-        public async Task<IActionResult> Index()
-        {
-              return _context.User != null ? 
-                          View(await _context.User.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.User'  is null.");
-        }
-
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.User == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // GET: Users/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Surname,Gender,BirthDate,TelephoneNumber,Position,ShoeSize")] User user)
+        public IActionResult Create(User user)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(user);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(user);
+            WriteUserToXML(user);
+            return RedirectToAction("Index");
         }
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        private List<User> ReadUsersFromXML()
         {
-            if (id == null || _context.User == null)
+            List<User> users;
+            using (FileStream fileStream = new FileStream(dataFilePath, FileMode.Open))
             {
-                return NotFound();
+                XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
+                users = (List<User>)serializer.Deserialize(fileStream);
             }
-
-            var user = await _context.User.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return View(user);
+            return users;
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Surname,Gender,BirthDate,TelephoneNumber,Position,ShoeSize")] User user)
+        private void WriteUserToXML(User user)
         {
-            if (id != user.Id)
-            {
-                return NotFound();
-            }
+            List<User> users = ReadUsersFromXML();
+            users.Add(user);
 
-            if (ModelState.IsValid)
+            using (FileStream fileStream = new FileStream(dataFilePath, FileMode.Create))
             {
-                try
-                {
-                    _context.Update(user);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!UserExists(user.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
+                serializer.Serialize(fileStream, users);
             }
-            return View(user);
-        }
-
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.User == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.User
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.User == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.User'  is null.");
-            }
-            var user = await _context.User.FindAsync(id);
-            if (user != null)
-            {
-                _context.User.Remove(user);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool UserExists(int id)
-        {
-          return (_context.User?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
