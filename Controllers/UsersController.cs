@@ -1,54 +1,91 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using WebApplication1.Models;
+using WebApplication1.Services;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using WebApplication1.Data;
-using WebApplication1.Models;
+using Microsoft.AspNetCore.Authorization;
 
-namespace WebApplication1.Controllers
+public class UserController : Controller
 {
-    public class UserController : Controller
+    private readonly UserXmlService _userXmlService;
+
+    public UserController(UserXmlService userXmlService)
     {
-        private string dataFilePath = "users.xml";
+        _userXmlService = userXmlService;
+    }
 
-        public IActionResult Index()
-        {
-            List<User> users = ReadUsersFromXML();
-            return View(users);
-        }
+    [HttpGet]
+    [Authorize]
+    public IActionResult Index()
+    {
+        List<User> users = _userXmlService.ReadUsersFromXML();
+        return View(users);
+    }
 
-        [HttpPost]
-        public IActionResult Create(User user)
+    [HttpGet]
+    [Authorize]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken] // Protection against CSRF attacks
+    public IActionResult Create(User user)
+    {
+        if (ModelState.IsValid) // Validation check
         {
-            WriteUserToXML(user);
+            _userXmlService.WriteUsersToXML(user);
             return RedirectToAction("Index");
         }
 
-        private List<User> ReadUsersFromXML()
+        return View(user); // Displaying a view with validation errors
+    }
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult Edit(int id)
+    {
+        User user = _userXmlService.GetUserById(id);
+        if (user == null)
         {
-            List<User> users;
-            using (FileStream fileStream = new FileStream(dataFilePath, FileMode.Open))
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
-                users = (List<User>)serializer.Deserialize(fileStream);
-            }
-            return users;
+            return NotFound(); // Handling no user
         }
 
-        private void WriteUserToXML(User user)
-        {
-            List<User> users = ReadUsersFromXML();
-            users.Add(user);
+        return View(user);
+    }
 
-            using (FileStream fileStream = new FileStream(dataFilePath, FileMode.Create))
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
-                serializer.Serialize(fileStream, users);
-            }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(User user)
+    {
+        if (ModelState.IsValid)
+        {
+            _userXmlService.UpdateUser(user);
+            return RedirectToAction("Index");
         }
+
+        return View(user);
+    }
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult Delete(int id)
+    {
+        User user = _userXmlService.GetUserById(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        return View(user);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public IActionResult DeleteConfirmed(int id)
+    {
+        _userXmlService.DeleteUser(id);
+        return RedirectToAction("Index");
     }
 }
