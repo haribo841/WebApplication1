@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 public class BirthDateNotInFutureAttribute : ValidationAttribute
@@ -7,11 +8,12 @@ public class BirthDateNotInFutureAttribute : ValidationAttribute
     {
         if (value is DateTime date)
         {
-            if (date > DateTime.Now)
+            if (date > DateTime.Now || date == DateTime.MinValue)
             {
                 return new ValidationResult(ErrorMessage);
             }
         }
         return ValidationResult.Success;
+        
     }
 }

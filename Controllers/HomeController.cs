@@ -49,7 +49,7 @@ namespace WebApplication1.Controllers
             if (birthDateError != null && birthDateError.Errors.Count > 0)
             {
                 birthDateError.Errors.Clear();
-                ModelState.AddModelError("BirthDate", "Podaj datę urodzenia.");
+                ModelState.AddModelError("BirthDate", "Podaj poprawną datę urodzenia.");
             }
             return View(user);
         }
