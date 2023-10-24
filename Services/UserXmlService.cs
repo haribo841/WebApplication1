@@ -30,7 +30,6 @@ namespace WebApplication1.Services
                 existingUser.Position = updatedUser.Position;
                 existingUser.ShoeSize = updatedUser.ShoeSize;
 
-                // Zapisz zmienioną listę użytkowników
                 WriteUsersToXML(users);
             }
         }
@@ -45,25 +44,30 @@ namespace WebApplication1.Services
                 WriteUsersToXML(users);
             }
         }
-
-
-
         public List<User> ReadUsersFromXML()
         {
-            List<User> users;
-            if (File.Exists(dataFilePath))
+            try
             {
-                using (FileStream fileStream = new FileStream(dataFilePath, FileMode.Open))
+                List<User> users;
+                if (File.Exists(dataFilePath))
                 {
-                    XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
-                    users = (List<User>)serializer.Deserialize(fileStream);
+                    using (FileStream fileStream = new FileStream(dataFilePath, FileMode.Open))
+                    {
+                        XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
+                        users = (List<User>)serializer.Deserialize(fileStream);
+                    }
                 }
+                else
+                {
+                    users = new List<User>();
+                }
+                return users;
             }
-            else
+            catch (Exception ex)
             {
-                users = new List<User>();
+                // _logger.LogError(ex, "Błąd odczytu danych XML");
+                return new List<User>();
             }
-            return users;
         }
         private void WriteUsersToXML(List<User> users)
         {

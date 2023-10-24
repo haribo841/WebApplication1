@@ -12,34 +12,43 @@ namespace WebApplication1.Models
         public int Id { get; set; }
 
         [XmlElement("FirstName")]
-        [Required(ErrorMessage = "First Name is required")]
-        [MaxLength(50, ErrorMessage = "First Name cannot exceed 50 characters")]
+        [Required(ErrorMessage = "Imię jest polem wymaganym.")]
+        [Display(Name = "Imię")]
+        [MaxLength(50, ErrorMessage = "Imię nie może przekraczać 50 znaków.")]
         public string Name { get; set; }
 
         [XmlElement("LastName")]
-        [Required(ErrorMessage = "Last Name is required")]
-        [MaxLength(150, ErrorMessage = "Last Name cannot exceed 150 characters")]
+        [Required(ErrorMessage = "Nazwisko jest polem wymaganym.")]
+        [Display(Name = "Nazwisko")]
+        [MaxLength(150, ErrorMessage = "Nazwisko nie może przekraczać 150 znaków.")]
         public string Surname { get; set; }
 
         [XmlElement("Gender")]
-        [Required(ErrorMessage = "Gender is required")]
+        [Required(ErrorMessage = "Płeć jest polem wymaganym.")]
+        [Display(Name = "Płeć")]
         public Gender Gender { get; set; }
 
         [XmlElement("BirthDate")]
-        [Required(ErrorMessage = "Birth Date is required")]
+        [Required(ErrorMessage = "Data urodzenia jest polem wymaganym.")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        [Display(Name = "Date of Birth")]
-        [BirthDateNotInFuture(ErrorMessage = "Date of Birth cannot be in the future")]
+        [Display(Name = "Data urodzenia")]
+        [BirthDateNotInFuture(ErrorMessage = "Data urodzenia nie może być z przyszłości.")]
         public DateTime BirthDate { get; set; }
 
         [XmlElement("TelephoneNumber")]
+        [Display(Name = "Numer telefonu")]
+        [RegularExpression(@"^\d{9}$", ErrorMessage = "Numer telefonu musi składać się z 9 cyfr.")]
         public int? TelephoneNumber { get; set; }
 
         [XmlElement("Position")]
+        [Display(Name = "Stanowisko")]
+        [MaxLength(100, ErrorMessage = "Stanowisko nie może przekraczać 100 znaków.")]
         public string? Position { get; set; }
 
         [XmlElement("ShoeSize")]
+        [Display(Name = "Numer buta")]
+        [Range(0, 100, ErrorMessage = "Numer buta musi być liczbą między 0 a 100.")]
         public int? ShoeSize { get; set; }
 
         public User()
